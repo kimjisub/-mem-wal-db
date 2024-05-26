@@ -51,7 +51,7 @@ wal 은 command 에 대해서만 작성됩니다.
 ## 명령줄
 
 ```
-./memlog --disk-io-latency <ms> <db.wal>
+./memwaldb --disk-io-latency <ms> <db.wal>
 ```
 
 이 프로그램은 In-Memory Key-Value 데이터베이스 시스템을 구현합니다. 시스템 시작 시 WAL 파일을 읽어 데이터베이스 상태를 복구하고, 사용자로부터 입력받은 트랜잭션을 처리하여 디스크에 로그를 기록하고 메모리에 반영합니다.
@@ -61,8 +61,8 @@ wal 은 command 에 대해서만 작성됩니다.
 프로그램을 컴파일하고 실행하려면 아래 명령어를 사용합니다.
 
 ```sh
-gcc -o memlog memlog.c
-./memlog <db.wal>
+make
+./memwaldb --disk-io-latency <ms> <db.wal>
 ```
 
 이 시스템은 트랜잭션 로그를 WAL 파일에 기록하고, 프로그램 재시작 시 로그를 재생하여 메모리 상태를 복구합니다. 사용자 입력을 통해 트랜잭션을 처리하고 결과를 반환합니다.
