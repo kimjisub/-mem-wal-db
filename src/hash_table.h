@@ -18,11 +18,11 @@ typedef struct {
     HashEntry entries[TABLE_SIZE];
 } HashTable;
 
-void init_table(HashTable *table);
+void hashtable_init(HashTable *table);
 unsigned int hash(const char *key);
-int set_value(HashTable *table, const char *key, const char *value);
-int get_value(HashTable *table, const char *key, char *value);
-int del_value(HashTable *table, const char *key);
-int exist_key(HashTable *table, const char *key);
+int hashtable_set(HashTable *table, const char *key, const char *value);
+int hashtable_get(HashTable *table, const char *key, char *value);
+int hashtable_del(HashTable *table, const char *key);
+int hashtable_exist_key(HashTable *table, const char *key);
 
 #endif

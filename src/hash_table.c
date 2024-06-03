@@ -1,6 +1,6 @@
 #include "hash_table.h"
 
-void init_table(HashTable *table) {
+void hashtable_init(HashTable *table) {
     for (int i = 0; i < TABLE_SIZE; ++i) {
         table->entries[i].is_occupied = 0;
     }
@@ -14,7 +14,7 @@ unsigned int hash(const char *key) {
     return hash % TABLE_SIZE;
 }
 
-int set_value(HashTable *table, const char *key, const char *value) {
+int hashtable_set(HashTable *table, const char *key, const char *value) {
     unsigned int index = hash(key);
     while (table->entries[index].is_occupied &&
            strcmp(table->entries[index].key, key) != 0) {
@@ -26,7 +26,7 @@ int set_value(HashTable *table, const char *key, const char *value) {
     return 1;
 }
 
-int get_value(HashTable *table, const char *key, char *value) {
+int hashtable_get(HashTable *table, const char *key, char *value) {
     unsigned int index = hash(key);
     while (table->entries[index].is_occupied) {
         if (strcmp(table->entries[index].key, key) == 0) {
@@ -38,7 +38,7 @@ int get_value(HashTable *table, const char *key, char *value) {
     return 0;
 }
 
-int del_value(HashTable *table, const char *key) {
+int hashtable_del(HashTable *table, const char *key) {
     unsigned int index = hash(key);
     while (table->entries[index].is_occupied) {
         if (strcmp(table->entries[index].key, key) == 0) {
@@ -50,7 +50,7 @@ int del_value(HashTable *table, const char *key) {
     return 0;
 }
 
-int exist_key(HashTable *table, const char *key) {
+int hashtable_exist_key(HashTable *table, const char *key) {
     unsigned int index = hash(key);
     while (table->entries[index].is_occupied) {
         if (strcmp(table->entries[index].key, key) == 0) {

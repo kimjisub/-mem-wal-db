@@ -5,7 +5,7 @@ CFLAGS = -Wall -g
 TARGET = memwaldb
 
 SRCDIR = src
-SRCS = $(SRCDIR)/main.c $(SRCDIR)/command.c $(SRCDIR)/core.c
+SRCS = $(SRCDIR)/main.c $(SRCDIR)/command.c $(SRCDIR)/core.c $(SRCDIR)/hash_table.c
 
 OBJS = $(SRCS:.c=.o)
 
