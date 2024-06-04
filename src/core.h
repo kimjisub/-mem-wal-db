@@ -2,6 +2,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/fcntl.h>
+#include <sys/types.h>
+#include <unistd.h>
 
 #include "hash_table.h"
 
@@ -10,8 +13,18 @@
 
 HashTable database;
 
-int log_transaction(const char *wal_filename, const char *transaction);
-int get_value(const char *key, char *buffer, size_t buffer_size);
-int set_value(const char *key, const char *value);
-int del_value(const char *key);
-int is_key_exist(const char *key);
+typedef struct {
+    HashTable db;
+    FILE *wal_file;
+    int replaying;
+} MemWalDB;
+
+int init_db(MemWalDB *db, const char *wal_filename);
+int close_db(MemWalDB *db);
+int replay_transactions(MemWalDB *db, const char *wal_filename);
+int log_transaction(MemWalDB *db, const char *transaction);
+int process_command(MemWalDB *db, int fd, char *command);
+int get_value(MemWalDB *db, const char *key, char *buffer, size_t buffer_size);
+int set_value(MemWalDB *db, const char *key, const char *value);
+int del_value(MemWalDB *db, const char *key);
+int is_key_exist(MemWalDB *db, const char *key);

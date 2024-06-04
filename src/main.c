@@ -12,57 +12,7 @@
 
 #include "core.h"
 
-void replay_transactions(const char *wal_filename) {
-    // FILE *file = fopen(wal_filename, "r");
-    // if (file == NULL) {
-    //     perror("Unable to open WAL file");
-    //     return;
-    // }
-
-    // char line[MAX_LINE];
-    // while (fgets(line, sizeof(line), file)) {
-    //     char command[10], key[50], value[200];
-    //     if (sscanf(line, "%s %s %s", command, key, value) >= 2) {
-    //         if (strcmp(command, "SET") == 0) {
-    //             set_value(key, value);
-    //         } else if (strcmp(command, "DEL") == 0) {
-    //             del_value(key);
-    //         } else if (strcmp(command, "FLUSHALL") == 0) {
-    //             // todo
-    //         }
-    //     }
-    // }
-
-    // fclose(file);
-}
-
-// void process_transactions(int read_fd, const char *wal_filename) {
-//     char buffer[MAX_LINE];
-//     while (read(read_fd, buffer, sizeof(buffer)) > 0) {
-//         char command[10], key[50], value[200];
-//         if (sscanf(buffer, "%s %s %s", command, key, value) >= 2) {
-//             if (strcmp(command, "SET") == 0) {
-//                 set_value(key, value);
-//                 log_transaction(wal_filename, buffer);
-//             } else if (strcmp(command, "GET") == 0) {
-//                 get_value(key, value, sizeof(value));
-//                 printf("Found: %s -> %s\n", key, value);
-//             } else if (strcmp(command, "EXIST") == 0) {
-//                 int exists = is_key_exist(key, value, sizeof(value));
-//                 if (exists) {
-//                     printf("T\n");
-//                 } else {
-//                     printf("F\n");
-//                 }
-//             } else if (strcmp(command, "DEL") == 0) {
-//                 del_value(key);
-//                 log_transaction(wal_filename, buffer);
-//             } else if (strcmp(command, "FLUSHALL") == 0) {
-//                 // todo
-//             }
-//         }
-//     }
-// }
+MemWalDB mwl;
 
 int main(int argc, char *argv[]) {
     if (argc != 2) {
@@ -71,7 +21,7 @@ int main(int argc, char *argv[]) {
     }
 
     const char *wal_filename = argv[1];
-    replay_transactions(wal_filename);
+    init_db(&mwl, wal_filename);
 
     int sockfd[2];
     socketpair(AF_UNIX, SOCK_STREAM, 0, sockfd);
@@ -110,7 +60,7 @@ int main(int argc, char *argv[]) {
                         continue;
                     }
 
-                    if (set_value(key, value) < 0) {
+                    if (set_value(&mwl, key, value) < 0) {
                         char *error = "FAILED TO SET VALUE";
                         write(sockfd[0], error, strlen(error) + 1);
                         continue;
@@ -126,7 +76,7 @@ int main(int argc, char *argv[]) {
                     }
 
                     char result[MAX_LINE];
-                    if (get_value(key, result, sizeof(result)) < 0) {
+                    if (get_value(&mwl, key, result, sizeof(result)) < 0) {
                         char *error = "NOT FOUND";
                         write(sockfd[0], error, strlen(error) + 1);
                         continue;
@@ -139,7 +89,7 @@ int main(int argc, char *argv[]) {
                         write(sockfd[0], "INVALID COMMAND", 15);
                         continue;
                     }
-                    if (del_value(key) < 0) {
+                    if (del_value(&mwl, key) < 0) {
                         char *error = "FAILED TO DELETE VALUE";
                         write(sockfd[0], error, strlen(error) + 1);
                         continue;
@@ -157,7 +107,7 @@ int main(int argc, char *argv[]) {
                         continue;
                     }
                     char result[MAX_LINE];
-                    if (get_value(key, result, sizeof(result)) < 0) {
+                    if (get_value(&mwl, key, result, sizeof(result)) < 0) {
                         char *error = "NOT FOUND";
                         write(sockfd[0], error, strlen(error) + 1);
                         continue;
@@ -170,7 +120,7 @@ int main(int argc, char *argv[]) {
                         write(sockfd[0], "INVALID COMMAND", 15);
                         continue;
                     }
-                    int index = is_key_exist(key);
+                    int index = is_key_exist(&mwl, key);
                     char response[MAX_LINE];
 
                     if (index < 0) {
@@ -182,12 +132,17 @@ int main(int argc, char *argv[]) {
                              index);
                     write(sockfd[0], response, strlen(response) + 1);
                     continue;
+                } else if (strcmp(command, "EXIT") == 0) {
+                    close_db(&mwl);
+                    exit(0);
+                    break;
                 } else if (strcmp(command, "HELP") == 0) {
                     write(sockfd[0], "SET <key> <value> : set value\n", 30);
                     write(sockfd[0], "GET <key> : get value\n", 22);
                     write(sockfd[0], "DEL <key> : delete value\n", 25);
                     write(sockfd[0], "FLUSHALL : delete all values\n", 29);
                     write(sockfd[0], "EXIST <key> : check if key exists\n", 34);
+                    write(sockfd[0], "EXIT : graceful shutdown\n", 34);
                     write(sockfd[0], "HELP : show this message\n", 26);
                 } else {
                     write(sockfd[0], "INVALID COMMAND", 15);
