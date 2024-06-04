@@ -105,41 +105,83 @@ int main(int argc, char *argv[]) {
                 if (strcmp(command, "SET") == 0) {
                     key = strtok(NULL, " \n");
                     value = strtok(NULL, " \n");
-                    if (key != NULL && value != NULL) {
-                        set_value(key, value);
-                        write(sockfd[0], "OK", 3);
-                    } else {
+                    if (key == NULL || value == NULL) {
                         write(sockfd[0], "INVALID COMMAND", 15);
+                        continue;
                     }
-                } else if (strcmp(command, "DEL") == 0) {
-                    key = strtok(NULL, " \n");
-                    if (key != NULL) {
-                        del_value(key);
-                        write(sockfd[0], "OK", 3);
-                    } else {
-                        write(sockfd[0], "INVALID COMMAND", 15);
+
+                    if (set_value(key, value) < 0) {
+                        char *error = "FAILED TO SET VALUE";
+                        write(sockfd[0], error, strlen(error) + 1);
+                        continue;
                     }
-                } else if (strcmp(command, "FLUSHALL") == 0) {
-                    write(sockfd[0], "NOT IMPLEMENT", 3);
+
+                    write(sockfd[0], "OK", 3);
+
                 } else if (strcmp(command, "GET") == 0) {
                     key = strtok(NULL, " \n");
-                    if (key != NULL) {
-                        char result[MAX_LINE];
-                        get_value(key, result, sizeof(result));
-                        write(sockfd[0], result, strlen(result) + 1);
-                    } else {
+                    if (key == NULL) {
                         write(sockfd[0], "INVALID COMMAND", 15);
+                        continue;
                     }
+
+                    char result[MAX_LINE];
+                    if (get_value(key, result, sizeof(result)) < 0) {
+                        char *error = "NOT FOUND";
+                        write(sockfd[0], error, strlen(error) + 1);
+                        continue;
+                    }
+
+                    write(sockfd[0], result, strlen(result) + 1);
+                } else if (strcmp(command, "DEL") == 0) {
+                    key = strtok(NULL, " \n");
+                    if (key == NULL) {
+                        write(sockfd[0], "INVALID COMMAND", 15);
+                        continue;
+                    }
+                    if (del_value(key) < 0) {
+                        char *error = "FAILED TO DELETE VALUE";
+                        write(sockfd[0], error, strlen(error) + 1);
+                        continue;
+                    }
+                    write(sockfd[0], "OK", 3);
+
+                } else if (strcmp(command, "FLUSHALL") == 0) {
+                    char *error = "NOT IMPLEMENT";
+                    write(sockfd[0], error, strlen(error) + 1);
+                    continue;
+                } else if (strcmp(command, "GET") == 0) {
+                    key = strtok(NULL, " \n");
+                    if (key == NULL) {
+                        write(sockfd[0], "INVALID COMMAND", 15);
+                        continue;
+                    }
+                    char result[MAX_LINE];
+                    if (get_value(key, result, sizeof(result)) < 0) {
+                        char *error = "NOT FOUND";
+                        write(sockfd[0], error, strlen(error) + 1);
+                        continue;
+                    }
+                    write(sockfd[0], result, strlen(result) + 1);
+
                 } else if (strcmp(command, "EXIST") == 0) {
                     key = strtok(NULL, " \n");
-                    if (key != NULL) {
-                        int exists = is_key_exist(key);
-                        char response[2];
-                        snprintf(response, sizeof(response), "%d", exists);
-                        write(sockfd[0], response, strlen(response) + 1);
-                    } else {
+                    if (key == NULL) {
                         write(sockfd[0], "INVALID COMMAND", 15);
+                        continue;
                     }
+                    int index = is_key_exist(key);
+                    char response[MAX_LINE];
+
+                    if (index < 0) {
+                        write(sockfd[0], "NOT EXIST", 6);
+                        continue;
+                    }
+
+                    snprintf(response, sizeof(response), "EXIST at (%d)",
+                             index);
+                    write(sockfd[0], response, strlen(response) + 1);
+                    continue;
                 } else if (strcmp(command, "HELP") == 0) {
                     write(sockfd[0], "SET <key> <value> : set value\n", 30);
                     write(sockfd[0], "GET <key> : get value\n", 22);

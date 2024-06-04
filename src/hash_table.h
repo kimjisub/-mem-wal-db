@@ -20,6 +20,8 @@ typedef struct {
 
 void hashtable_init(HashTable *table);
 unsigned int hash(const char *key);
+int hashtable_find_index(HashTable *table, const char *key);
+int hashtable_get_next_index(HashTable *table, const char *key);
 int hashtable_set(HashTable *table, const char *key, const char *value);
 int hashtable_get(HashTable *table, const char *key, char *value);
 int hashtable_del(HashTable *table, const char *key);

@@ -10,8 +10,8 @@
 
 HashTable database;
 
-void log_transaction(const char *wal_filename, const char *transaction);
-void get_value(const char *key, char *buffer, size_t buffer_size);
-void set_value(const char *key, const char *value);
-void del_value(const char *key);
+int log_transaction(const char *wal_filename, const char *transaction);
+int get_value(const char *key, char *buffer, size_t buffer_size);
+int set_value(const char *key, const char *value);
+int del_value(const char *key);
 int is_key_exist(const char *key);
