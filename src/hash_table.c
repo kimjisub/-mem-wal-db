@@ -132,7 +132,7 @@ int hashtable_del(HashTable *table, const char *key) {
  * 존재하지 않는다면, -1을 반환합니다.
  */
 int hashtable_exist_key(HashTable *table, const char *key) {
-    unsigned int index = hashtable_find_index(table, key);
+    int index = hashtable_find_index(table, key);
 
     return index;
 }

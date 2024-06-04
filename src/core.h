@@ -1,9 +1,12 @@
+#include <ctype.h>
 #include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/fcntl.h>
+#include <sys/stat.h>
 #include <sys/types.h>
+#include <time.h>
 #include <unistd.h>
 
 #include "hash_table.h"
@@ -21,6 +24,7 @@ typedef struct {
 
 int init_db(MemWalDB *db, const char *wal_filename);
 int close_db(MemWalDB *db);
+void print_wal_info(MemWalDB *db);
 int replay_transactions(MemWalDB *db, const char *wal_filename);
 int log_transaction(MemWalDB *db, const char *transaction);
 int process_command(MemWalDB *db, int fd, char *command);

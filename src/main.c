@@ -23,16 +23,21 @@ int main(int argc, char *argv[]) {
     const char *wal_filename = argv[1];
     init_db(&mwl, wal_filename);
 
+    // !평가기준 - IPC/시스템V 통신 (Pipe, Socket)
+    // 수업시간에 socketpair에 대해서 다루진 않았지만,
+    // socketpair는 두 프로세스 간 통신을 위한 양방향 파이프를 생성하는
+    // 함수입니다.
     int sockfd[2];
-    socketpair(AF_UNIX, SOCK_STREAM, 0, sockfd);
+    socketpair(AF_LOCAL, SOCK_STREAM, 0, sockfd);
 
+    // !평가기준 - 프로세스 생성/exec 함수군
     pid_t pid = fork();
     if (pid == 0) {
         // 자식 프로세스 (프론트엔드)
         close(sockfd[0]);
         while (1) {
             char transaction[MAX_LINE];
-            printf("Enter command: ");
+            printf("> ");
             fgets(transaction, sizeof(transaction), stdin);
             write(sockfd[1], transaction, strlen(transaction) + 1);
 

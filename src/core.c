@@ -8,9 +8,8 @@ int init_db(MemWalDB *db, const char *wal_filename) {
         fprintf(stderr, "Unable to open WAL file: %s\n", wal_filename);
         return -1;
     }
-    rewind(wal_file);
     db->wal_file = wal_file;
-
+    print_wal_info(db);
     return replay_transactions(db, wal_filename);
 }
 
@@ -19,6 +18,34 @@ int close_db(MemWalDB *db) {
     return 0;
 }
 
+void print_wal_info(MemWalDB *db) {
+    // !평가기준 - 파일 정보
+    struct stat st;
+    if (fstat(fileno(db->wal_file), &st) != 0) {
+        fprintf(stderr, "Unable to get WAL file size\n");
+        return;
+    }
+
+    printf("WAL file size: %lld bytes\n", st.st_size);
+    printf("WAL file last accessed: %s", ctime(&st.st_atime));
+    printf("WAL file last modified: %s", ctime(&st.st_mtime));
+    printf("WAL file last status change: %s", ctime(&st.st_ctime));
+
+    rewind(db->wal_file);
+
+    char line[MAX_LINE];
+    int line_count = 0;
+    while (fgets(line, MAX_LINE, db->wal_file) != NULL) {
+        line_count++;
+    }
+
+    rewind(db->wal_file);
+
+    printf("WAL file line count: %d\n", line_count);
+    printf("\n\n");
+}
+
+// !평가기준 - 파일 입/출력
 int replay_transactions(MemWalDB *db, const char *wal_filename) {
     FILE *wal_read = fopen(wal_filename, "r");
     if (wal_read == NULL) {
@@ -36,24 +63,26 @@ int replay_transactions(MemWalDB *db, const char *wal_filename) {
         return -1;
     }
 
-    printf("Replaying transactions...\n");
+    printf("Replaying transactions");
 
     while (fgets(line, MAX_LINE, wal_read) != NULL) {
-        printf("Replaying transaction: %s", line);
+        printf(".");
         if (process_command(db, fd, line) < 0) {
             db->replaying = 0;
             close(fd);
             return -1;
         }
     }
+    printf("\n");
     close(fd);
 
     db->replaying = 0;
 
-    fprintf(stderr, "Replayed all transactions.\n");
+    fprintf(stderr, "Replayed all transactions.\n\n");
     return 0;
 }
 
+// !평가기준 - 파일 입/출력
 int log_transaction(MemWalDB *db, const char *transaction) {
     // replay 중에는 로그를 남기지 않습니다.
     if (db->replaying == 1) {
@@ -71,14 +100,22 @@ int log_transaction(MemWalDB *db, const char *transaction) {
     return 0;
 }
 
-int process_command(MemWalDB *db, int fd, char *command) {
-    char *type = strtok(command, " \n");
-    if (type == NULL) {
+/**
+ * 단순히 명령어를 파싱하고, 해당 명령어에 해당하는 함수를 호출하는 함수입니다.
+ */
+int process_command(MemWalDB *db, int fd, char *line) {
+    char *command = strtok(line, " \n");
+    if (command == NULL) {
         write(fd, "INVALID COMMAND", 15);
         return -1;
     }
 
-    if (strcmp(type, "SET") == 0) {
+    // 명령어를 대문자로 변환
+    for (char *p = command; *p != '\0'; p++) {
+        *p = toupper(*p);
+    }
+
+    if (strcmp(command, "SET") == 0) {
         char *key = strtok(NULL, " \n");
         char *value = strtok(NULL, " \n");
         if (key == NULL || value == NULL) {
@@ -95,7 +132,7 @@ int process_command(MemWalDB *db, int fd, char *command) {
         write(fd, "OK", 3);
         return 0;
 
-    } else if (strcmp(type, "GET") == 0) {
+    } else if (strcmp(command, "GET") == 0) {
         char *key = strtok(NULL, " \n");
         if (key == NULL) {
             write(fd, "INVALID COMMAND", 15);
@@ -111,7 +148,7 @@ int process_command(MemWalDB *db, int fd, char *command) {
 
         write(fd, result, strlen(result) + 1);
         return 0;
-    } else if (strcmp(type, "DEL") == 0) {
+    } else if (strcmp(command, "DEL") == 0) {
         char *key = strtok(NULL, " \n");
         if (key == NULL) {
             write(fd, "INVALID COMMAND", 15);
@@ -125,11 +162,11 @@ int process_command(MemWalDB *db, int fd, char *command) {
         write(fd, "OK", 3);
         return 0;
 
-    } else if (strcmp(type, "FLUSHALL") == 0) {
+    } else if (strcmp(command, "FLUSHALL") == 0) {
         char *error = "NOT IMPLEMENT";
         write(fd, error, strlen(error) + 1);
         return -1;
-    } else if (strcmp(type, "EXIST") == 0) {
+    } else if (strcmp(command, "EXIST") == 0) {
         char *key = strtok(NULL, " \n");
         if (key == NULL) {
             write(fd, "INVALID COMMAND", 15);
@@ -139,14 +176,14 @@ int process_command(MemWalDB *db, int fd, char *command) {
         char response[MAX_LINE];
 
         if (index < 0) {
-            write(fd, "NOT EXIST", 6);
+            write(fd, "NOT EXIST", 10);
             return -1;
         }
 
-        snprintf(response, sizeof(response), "EXIST at (%d)", index);
-        write(fd, response, strlen(response) + 1);
+        snprintf(response, sizeof(response), "EXIST at %d", index);
+        write(fd, response, strlen(response));
         return 0;
-    } else if (strcmp(type, "HELP") == 0) {
+    } else if (strcmp(command, "HELP") == 0) {
         write(fd, "SET <key> <value> : set value\n", 29);
         write(fd, "GET <key> : get value\n", 21);
         write(fd, "DEL <key> : delete value\n", 24);

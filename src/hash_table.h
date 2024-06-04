@@ -6,7 +6,7 @@
 
 #define MAX_KEY_LENGTH 50
 #define MAX_VALUE_LENGTH 200
-#define TABLE_SIZE 1000
+#define TABLE_SIZE 10
 
 typedef struct {
     char key[MAX_KEY_LENGTH];
