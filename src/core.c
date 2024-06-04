@@ -184,13 +184,13 @@ int process_command(MemWalDB *db, int fd, char *line) {
         write(fd, response, strlen(response));
         return 0;
     } else if (strcmp(command, "HELP") == 0) {
-        write(fd, "SET <key> <value> : set value\n", 29);
-        write(fd, "GET <key> : get value\n", 21);
-        write(fd, "DEL <key> : delete value\n", 24);
-        write(fd, "FLUSHALL : delete all values\n", 28);
-        write(fd, "EXIST <key> : check if key exists\n", 33);
-        write(fd, "EXIT : graceful shutdown\n", 25);
-        write(fd, "HELP : show this message\n", 25);
+        write(fd, "SET <key> <value> : set value\n", 30);
+        write(fd, "GET <key> : get value\n", 22);
+        write(fd, "DEL <key> : delete value\n", 25);
+        write(fd, "FLUSHALL : delete all values\n", 29);
+        write(fd, "EXIST <key> : check if key exists\n", 34);
+        write(fd, "EXIT : graceful shutdown\n", 26);
+        write(fd, "HELP : show this message\n", 26);
         return 0;
     } else {
         write(fd, "INVALID COMMAND", 15);
@@ -199,7 +199,7 @@ int process_command(MemWalDB *db, int fd, char *line) {
 }
 
 int get_value(MemWalDB *db, const char *key, char *buffer, size_t buffer_size) {
-    int ret = hashtable_get(&database, key, buffer);
+    int ret = hashtable_get(&database, key, buffer, buffer_size);
     if (ret < 0) {
         return -1;
     }

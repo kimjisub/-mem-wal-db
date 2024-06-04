@@ -6,7 +6,7 @@
 
 #define MAX_KEY_LENGTH 50
 #define MAX_VALUE_LENGTH 200
-#define TABLE_SIZE 10
+#define TABLE_SIZE 3
 
 typedef struct {
     char key[MAX_KEY_LENGTH];
@@ -23,7 +23,8 @@ unsigned int hash(const char *key);
 int hashtable_find_index(HashTable *table, const char *key);
 int hashtable_get_next_index(HashTable *table, const char *key);
 int hashtable_set(HashTable *table, const char *key, const char *value);
-int hashtable_get(HashTable *table, const char *key, char *value);
+int hashtable_get(HashTable *table, const char *key, char *value,
+                  size_t buffer_size);
 int hashtable_del(HashTable *table, const char *key);
 int hashtable_exist_key(HashTable *table, const char *key);
 

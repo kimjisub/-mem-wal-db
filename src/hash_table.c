@@ -98,7 +98,8 @@ int hashtable_set(HashTable *table, const char *key, const char *value) {
     return 0;
 }
 
-int hashtable_get(HashTable *table, const char *key, char *value) {
+int hashtable_get(HashTable *table, const char *key, char *value,
+                  size_t buffer_size) {
     unsigned int index = hashtable_find_index(table, key);
 
     // 찾지 못했다면, 실패
@@ -107,7 +108,8 @@ int hashtable_get(HashTable *table, const char *key, char *value) {
     }
 
     // 찾았다면, 값을 복사
-    strcpy(value, table->entries[index].value);
+    strncpy(value, table->entries[index].value, buffer_size - 1);
+    value[buffer_size - 1] = '\0'; // 널 종료 문자 추가
 
     return 0;
 }

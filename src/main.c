@@ -30,7 +30,7 @@ int main(int argc, char *argv[]) {
     int sockfd[2];
     socketpair(AF_LOCAL, SOCK_STREAM, 0, sockfd);
 
-    // !평가기준 - 프로세스 생성/exec 함수군
+    // !평가기준 - 프로세스 생성
     pid_t pid = fork();
     if (pid == 0) {
         // 자식 프로세스 (프론트엔드)
