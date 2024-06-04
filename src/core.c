@@ -147,12 +147,13 @@ int process_command(MemWalDB *db, int fd, char *command) {
         write(fd, response, strlen(response) + 1);
         return 0;
     } else if (strcmp(type, "HELP") == 0) {
-        write(fd, "SET <key> <value> : set value\n", 30);
-        write(fd, "GET <key> : get value\n", 22);
-        write(fd, "DEL <key> : delete value\n", 25);
-        write(fd, "FLUSHALL : delete all values\n", 29);
-        write(fd, "EXIST <key> : check if key exists\n", 34);
-        write(fd, "HELP : show this message\n", 26);
+        write(fd, "SET <key> <value> : set value\n", 29);
+        write(fd, "GET <key> : get value\n", 21);
+        write(fd, "DEL <key> : delete value\n", 24);
+        write(fd, "FLUSHALL : delete all values\n", 28);
+        write(fd, "EXIST <key> : check if key exists\n", 33);
+        write(fd, "EXIT : graceful shutdown\n", 25);
+        write(fd, "HELP : show this message\n", 25);
         return 0;
     } else {
         write(fd, "INVALID COMMAND", 15);
