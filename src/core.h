@@ -28,6 +28,7 @@ void print_wal_info(MemWalDB *db);
 int replay_transactions(MemWalDB *db, const char *wal_filename);
 int log_transaction(MemWalDB *db, const char *transaction);
 int process_command(MemWalDB *db, int fd, char *command);
+
 int get_value(MemWalDB *db, const char *key, char *buffer, size_t buffer_size);
 int set_value(MemWalDB *db, const char *key, const char *value);
 int del_value(MemWalDB *db, const char *key);

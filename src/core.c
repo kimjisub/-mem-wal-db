@@ -19,7 +19,7 @@ int close_db(MemWalDB *db) {
 }
 
 void print_wal_info(MemWalDB *db) {
-    // !평가기준 - 파일 정보
+    // !평가기준 2 - 파일 정보
     struct stat st;
     if (fstat(fileno(db->wal_file), &st) != 0) {
         fprintf(stderr, "Unable to get WAL file size\n");
@@ -45,7 +45,7 @@ void print_wal_info(MemWalDB *db) {
     printf("\n\n");
 }
 
-// !평가기준 - 파일 입/출력
+// !평가기준 1 - 파일 입/출력
 int replay_transactions(MemWalDB *db, const char *wal_filename) {
     FILE *wal_read = fopen(wal_filename, "r");
     if (wal_read == NULL) {
@@ -82,7 +82,7 @@ int replay_transactions(MemWalDB *db, const char *wal_filename) {
     return 0;
 }
 
-// !평가기준 - 파일 입/출력
+// !평가기준 1 - 파일 입/출력
 int log_transaction(MemWalDB *db, const char *transaction) {
     // replay 중에는 로그를 남기지 않습니다.
     if (db->replaying == 1) {
@@ -181,8 +181,11 @@ int process_command(MemWalDB *db, int fd, char *line) {
         }
 
         snprintf(response, sizeof(response), "EXIST at %d", index);
-        write(fd, response, strlen(response));
+        write(fd, response, strlen(response) + 1);
         return 0;
+    } else if (strcmp(command, "EXIT") == 0) {
+        write(fd, "GOODBYE", 8);
+        return -1;
     } else if (strcmp(command, "HELP") == 0) {
         write(fd, "SET <key> <value> : set value\n", 30);
         write(fd, "GET <key> : get value\n", 22);
@@ -193,7 +196,7 @@ int process_command(MemWalDB *db, int fd, char *line) {
         write(fd, "HELP : show this message\n", 26);
         return 0;
     } else {
-        write(fd, "INVALID COMMAND", 15);
+        write(fd, "INVALID COMMAND\n", 17);
         return -1;
     }
 }

@@ -7,7 +7,7 @@ TARGET = memwaldb
 SRCDIR = src
 HDRDIR = include
 SRCS = $(SRCDIR)/main.c $(SRCDIR)/core.c $(SRCDIR)/hash_table.c
-HDRS = $(HDRDIR)/main.h $(HDRDIR)/core.h $(HDRDIR)/hash_table.h
+HDRS = $(HDRDIR)/core.h $(HDRDIR)/hash_table.h
 
 OBJS = $(SRCS:.c=.o)
 
