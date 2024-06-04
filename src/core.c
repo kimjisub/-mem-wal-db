@@ -202,7 +202,7 @@ int process_command(MemWalDB *db, int fd, char *line) {
 }
 
 int get_value(MemWalDB *db, const char *key, char *buffer, size_t buffer_size) {
-    int ret = hashtable_get(&database, key, buffer, buffer_size);
+    int ret = hashtable_get(&db->db, key, buffer, buffer_size);
     if (ret < 0) {
         return -1;
     }
@@ -210,7 +210,7 @@ int get_value(MemWalDB *db, const char *key, char *buffer, size_t buffer_size) {
 }
 
 int set_value(MemWalDB *db, const char *key, const char *value) {
-    int ret = hashtable_set(&database, key, value);
+    int ret = hashtable_set(&db->db, key, value);
     if (ret < 0) {
         return -1;
     }
@@ -220,7 +220,7 @@ int set_value(MemWalDB *db, const char *key, const char *value) {
 }
 
 int del_value(MemWalDB *db, const char *key) {
-    int ret = hashtable_del(&database, key);
+    int ret = hashtable_del(&db->db, key);
     if (ret < 0) {
         return -1;
     }
@@ -230,7 +230,7 @@ int del_value(MemWalDB *db, const char *key) {
 }
 
 int is_key_exist(MemWalDB *db, const char *key) {
-    int index = hashtable_exist_key(&database, key);
+    int index = hashtable_exist_key(&db->db, key);
 
     return index;
 }

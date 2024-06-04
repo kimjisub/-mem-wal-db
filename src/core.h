@@ -14,8 +14,6 @@
 #define MAX_LINE 256
 #define DB_SIZE 1000
 
-HashTable database;
-
 typedef struct {
     HashTable db;
     FILE *wal_file;
